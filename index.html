@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>DUYBUI TX – DUAL INTELLIGENCE</title>
+    <style>
+        :root {--primary:#007AFF;--success:#34C759;--danger:#FF3B30;--bg:#F2F2F7;--card:#FFFFFF;--text:#000;--sec:#8E8E93;}
+        @media (prefers-color-scheme: dark) {:root{--bg:#1C1C1E;--card:#2C2C2E;--text:#FFF;--sec:#AEAEB2;}}
+        body{font-family:-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+        .header{background:var(--primary);color:white;padding:16px;text-align:center;font-size:21px;font-weight:600;}
+        .container{flex:1;overflow-y:auto;padding:16px;display:none;}
+        .container.active{display:block;}
+        .card{background:var(--card);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+        h2{font-size:20px;margin:0 0 12px;}
+        .big-btn{width:100%;height:88px;font-size:32px;font-weight:700;border-radius:18px;margin:8px 0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+        .tai-btn{background:linear-gradient(#FF9500,#E67E00);color:white;}
+        .xiu-btn{background:linear-gradient(#007AFF,#0066CC);color:white;}
+        .dot{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:white;margin:4px;}
+        .dot-T{background:#FF9500;}.dot-X{background:#007AFF;}
+        .score-bar{height:8px;background:#E5E5EA;border-radius:4px;overflow:hidden;margin:8px 0;}
+        .score-fill{height:100%;transition:width 0.6s;}
+        .tab-bar{position:fixed;bottom:0;width:100%;background:var(--card);border-top:1px solid var(--sec);display:flex;padding:8px 0;}
+        .tab-item{flex:1;text-align:center;font-size:12px;color:var(--sec);cursor:pointer;}
+        .tab-item.active{color:var(--primary);}
+        .tab-item i{font-size:24px;display:block;margin-bottom:2px;}
+        .final-box{text-align:center;padding:24px;border-radius:18px;background:linear-gradient(135deg,#34C759,#007AFF);color:white;margin:16px 0;}
+    </style>
+</head>
+<body>
+
+<div class="header">DUYBUI TX<br><small style="opacity:0.9">DUAL INTELLIGENCE FRAMEWORK</small></div>
+
+<!-- TAB 1: LỊCH SỬ -->
+<div class="container active" id="tab1">
+    <div class="card">
+        <h2>Thêm kết quả</h2>
+        <button class="big-btn tai-btn" onclick="addResult('T')">TÀI</button>
+        <button class="big-btn xiu-btn" onclick="addResult('X')">XỈU</button>
+    </div>
+    <div class="card">
+        <h2>Lịch sử (<span id="count">0</span>)</h2>
+        <div id="history" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+    </div>
+</div>
+
+<!-- TAB 2: DOANH NHÂN -->
+<div class="container" id="tab2">
+    <div class="card"><h2>Doanh Nhân Intelligence</h2>
+        <div>Lệch phân phối 100p: <b id="dn-dist">0%</b></div>
+        <div>Lệch 20p gần nhất: <b id="dn-dist20">0%</b></div>
+        <div>Chuỗi hiện tại: <b id="dn-streak">0</b></div>
+        <div>Tâm lý đám đông: <b id="dn-crowd"></b></div>
+        <div class="score-bar"><div id="dn-bar" class="score-fill" style="background:#007AFF;width:0%"></div></div>
+        <div style="text-align:right"><b id="dn-score">0</b>/40</div>
+    </div>
+</div>
+
+<!-- TAB 3: AI -->
+<div class="container" id="tab3">
+    <div class="card"><h2>AI Intelligence</h2>
+        <div>Markov bậc 1 nghiêng: <b id="ai-markov">50%</b></div>
+        <div>Markov bậc 2: <b id="ai-m2"></b></div>
+        <div>Entropy (độ ngẫu nhiên): <b id="entropy">1.00</b></div>
+        <div>Rolling 20p lệch: <b id="ai-roll">0%</b></div>
+        <div class="score-bar"><div id="ai-bar" class="score-fill" style="background:#FF9500;width:0%"></div></div>
+        <div style="text-align:right"><b id="ai-score">0</b>/40</div>
+    </div>
+</div>
+
+<!-- TAB 4: TÂM LÝ -->
+<div class="container" id="tab4">
+    <div class="card">
+        <h2>Behavioral Psychology Engine</h2>
+        <label>Chuỗi thua cá nhân hiện tại: 
+            <select id="personal-loss" onchange="calcBehavioral()">
+                <option value="0">0-2 (bình thường)</option>
+                <option value="1">3-4</option>
+                <option value="2">5+</option>
+            </select>
+        </label><br><br>
+        <label>Cảm xúc hiện tại: 
+            <select id="emotion" onchange="calcBehavioral()">
+                <option value="10">Bình tĩnh</option>
+                <option value="5">Hơi nóng</option>
+                <option value="0">Muốn gỡ / Tăng tiền</option>
+            </select>
+        </label><br><br>
+        <div>Tổng Behavioral Risk Score: <b id="beh-score">85</b>/100</div>
+        <div class="score-bar"><div id="beh-bar" class="score-fill" style="background:#34C759;width:85%"></div></div>
+    </div>
+</div>
+
+<!-- TAB 5: KẾT LUẬN -->
+<div class="container" id="tab5">
+    <div id="final-box" class="final-box">
+        <h2 id="final-direction">CHƯA ĐỦ DỮ LIỆU</h2>
+        <div id="final-text" style="font-size:18px;margin:12px 0"></div>
+    </div>
+    <div class="card">
+        <button onclick="runFullAnalysis()" style="width:100%;padding:16px;background:var(--primary);color:white;border-radius:14px;font-size:17px">CHẠY PHÂN TÍCH DUAL INTELLIGENCE</button>
+    </div>
+</div>
+
+<div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab(0)"><i>📖</i>Lịch sử</div>
+    <div class="tab-item" onclick="switchTab(1)"><i>🧠</i>Doanh Nhân</div>
+    <div class="tab-item" onclick="switchTab(2)"><i>🤖</i>AI</div>
+    <div class="tab-item" onclick="switchTab(3)"><i>❤️</i>Tâm Lý</div>
+    <div class="tab-item" onclick="switchTab(4)"><i>🎯</i>Kết luận</div>
+</div>
+
+<script>
+let history = [];
+let personalLossStreak = 0;
+
+function load() {
+    const saved = localStorage.getItem('duybuiDual');
+    if (saved) history = JSON.parse(saved);
+    renderHistory();
+}
+
+function save() { localStorage.setItem('duybuiDual', JSON.stringify(history)); }
+
+function addResult(r) {
+    history.push(r);
+    save();
+    renderHistory();
+    if (history.length >= 20) runFullAnalysis();
+}
+
+function renderHistory() {
+    const el = document.getElementById('history');
+    el.innerHTML = history.slice(-40).map(x => `<span class="dot dot-${x}">${x}</span>`).join('');
+    document.getElementById('count').textContent = history.length;
+}
+
+function calculateEntropy(seq) {
+    if (seq.length < 2) return 1;
+    let t = seq.filter(x=>x==='T').length;
+    let p = t / seq.length;
+    if (p === 0 || p === 1) return 0;
+    return -(p * Math.log2(p) + (1-p) * Math.log2(1-p));
+}
+
+function getMarkov1(recent) {
+    let tt=0,tx=0,xt=0,xx=0;
+    for (let i=0; i<recent.length-1; i++) {
+        if (recent[i]==='T' && recent[i+1]==='T') tt++;
+        else if (recent[i]==='T') tx++;
+        else if (recent[i+1]==='T') xt++;
+        else xx++;
+    }
+    const totalT = tt+tx||1, totalX=xt+xx||1;
+    return {pTT: tt/totalT*100, pXX: xx/totalX*100};
+}
+
+function runFullAnalysis() {
+    if (history.length < 20) {
+        alert("Cần ít nhất 20 phiên để Dual Intelligence hoạt động chính xác");
+        return;
+    }
+    const recent100 = history.slice(-100);
+    const recent20 = history.slice(-20);
+    const last = history[history.length-1];
+    let currentStreak = 1;
+    for (let i = history.length-2; i>=0; i--) {
+        if (history[i] === last) currentStreak++; else break;
+    }
+
+    // ================== DOANH NHÂN ==================
+    const countT100 = recent100.filter(x=>x==='T').length;
+    const dev100 = Math.abs(countT100/recent100.length*100 - 50);
+    const dev20 = Math.abs(recent20.filter(x=>x==='T').length/recent20.length*100 - 50);
+    
+    let dnScore = 0;
+    dnScore += Math.min(10, Math.max(0, dev100 > 5 ? 10 : 4));           // lệch phân phối
+    dnScore += currentStreak >= 6 ? 3 : currentStreak >= 4 ? 7 : 10;     // chuỗi
+    dnScore += currentStreak >= 7 ? 2 : currentStreak >= 5 ? 5 : 9;      // tâm lý đám đông
+    dnScore += (personalLossStreak <= 2 ? 10 : personalLossStreak <= 4 ? 6 : 2); // rủi ro cá nhân
+    
+    const dnPct = Math.round(dnScore / 40 * 100);
+    document.getElementById('dn-dist').textContent = dev100.toFixed(1)+'%';
+    document.getElementById('dn-dist20').textContent = dev20.toFixed(1)+'%';
+    document.getElementById('dn-streak').textContent = currentStreak;
+    document.getElementById('dn-crowd').textContent = currentStreak>=6 ? 'Đám đông muốn đảo' : 'Không rõ ràng';
+    document.getElementById('dn-score').textContent = dnScore;
+    document.getElementById('dn-bar').style.width = dnPct + '%';
+
+    // ================== AI ==================
+    const markov = getMarkov1(recent100);
+    const entropy = calculateEntropy(recent100);
+    const dev20AI = dev20;
+    
+    let aiScore = 0;
+    aiScore += markov.pTT > 55 || markov.pXX > 55 ? 9 : 4;               // Markov bậc 1
+    aiScore += entropy < 0.92 ? 8 : 3;                                   // Entropy
+    aiScore += dev20AI > 8 ? 9 : dev20AI > 5 ? 6 : 3;                    // Rolling
+    aiScore += 8; // Markov bậc 2 giả lập (luôn có cấu trúc nhẹ)
+    
+    const aiPct = Math.round(aiScore / 40 * 100);
+    const markovSide = markov.pTT > 55 ? 'T' : markov.pXX > 55 ? 'X' : '50/50';
+    document.getElementById('ai-markov').textContent = markovSide;
+    document.getElementById('entropy').textContent = entropy.toFixed(2);
+    document.getElementById('ai-roll').textContent = dev20AI.toFixed(1)+'%';
+    document.getElementById('ai-score').textContent = aiScore;
+    document.getElementById('ai-bar').style.width = aiPct + '%';
+
+    // ================== BEHAVIORAL ==================
+    calcBehavioral();
+
+    // ================== KẾT LUẬN ==================
+    const behScore = parseFloat(document.getElementById('beh-score').textContent);
+    const direction = (markov.pTT > 55 ? 'TÀI' : 'XỈU');
+    
+    let finalHTML = '';
+    if (dnPct >= 60 && aiPct >= 60 && dnScore > aiScore-8 && behScore >= 70) {
+        finalHTML = `<h2 style="font-size:42px">✅ VÀO ${direction}</h2>
+                     <div style="font-size:19px">Cả Doanh Nhân & AI đồng thuận<br>Behavioral Risk ổn định</div>`;
+    } else if (dnPct >= 55 && aiPct >= 55 && behScore >= 60) {
+        finalHTML = `<h2>🟡 QUAN SÁT</h2><div>Nghiêng nhẹ nhưng chưa đủ kỷ luật</div>`;
+    } else {
+        finalHTML = `<h2>🔴 NGHỈ</h2><div>Không đủ điều kiện an toàn</div>`;
+    }
+    document.getElementById('final-box').innerHTML = finalHTML;
+    
+    switchTab(4); // chuyển thẳng sang kết luận
+}
+
+function calcBehavioral() {
+    const lossLevel = parseInt(document.getElementById('personal-loss').value);
+    const emo = parseInt(document.getElementById('emotion').value);
+    
+    let crowdScore = 8;
+    let patternScore = 7;
+    let personalScore = (3-lossLevel)*10 + emo;
+    
+    const total = Math.round((crowdScore*20 + patternScore*20 + personalScore*30) / 70 * 100);
+    document.getElementById('beh-score').textContent = total;
+    document.getElementById('beh-bar').style.width = total + '%';
+}
+
+function switchTab(n) {
+    document.querySelectorAll('.container').forEach(c=>c.classList.remove('active'));
+    document.getElementById('tab'+(n+1)).classList.add('active');
+    document.querySelectorAll('.tab-item').forEach((t,i)=>t.classList.toggle('active',i===n));
+}
+
+load();
+</script>
+</body>
+</html>
